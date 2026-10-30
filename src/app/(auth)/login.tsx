@@ -15,10 +15,11 @@ import {
 
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { ActionButton } from '@/components/ui/ActionButton';
-import { login } from '@/services/auth.service';
-import { colors, fonts } from '@/theme';
 import { authRoute, parseAuthIntent } from '@/models/AuthFlow';
 import { useAuth } from '@/providers/AuthProvider';
+import { login } from '@/services/auth.service';
+import { colors, fonts } from '@/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 function getAuthErrorCode(error: unknown) {
   if (typeof error === 'object' && error !== null && 'code' in error) {
@@ -73,6 +74,7 @@ export default function LoginScreen() {
   const restorePasswordFocusOnDismiss = useRef(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword]= useState(false);
   const [loading, setLoading] = useState(false);
 
   function closeAuthError(restoreFocus: boolean) {
@@ -154,12 +156,21 @@ export default function LoginScreen() {
               value={password}
               onChangeText={setPassword}
               placeholder="Ingresá tu contraseña"
-              secureTextEntry
+              secureTextEntry={!showPassword}
               autoCapitalize="none"
               autoCorrect={false}
               autoComplete="password"
               editable={!loading}
               onSubmitEditing={handleLogin}
+              trailing={
+  <Pressable onPress={() => setShowPassword(!showPassword)}>
+    <Ionicons
+      name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+      size={22}
+      color={colors.text}
+    />
+  </Pressable>
+}
             />
           </View>
 
@@ -333,3 +344,4 @@ const styles = StyleSheet.create({
   },
   modalActions: { width: '100%', gap: 8 },
 });
+s
