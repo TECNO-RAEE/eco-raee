@@ -1,4 +1,9 @@
 import { Stack } from 'expo-router';
+import { CompanyPortalProvider } from '@/providers/CompanyPortalProvider';
 export default function CompanyLayout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <CompanyPortalProvider>
+      <Stack screenOptions={{ headerShown: false }} />
+    </CompanyPortalProvider>
+  );
 }

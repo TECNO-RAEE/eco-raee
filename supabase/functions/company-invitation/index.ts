@@ -11,6 +11,10 @@ const respond = (status: number, body: object) =>
     headers: { ...cors, 'Content-Type': 'application/json' },
   });
 
+// Optional display name typed by the owner; it only seeds the profile of a newly created account.
+const inviteeName = (value: unknown) =>
+  typeof value === 'string' && value.trim() ? value.trim().slice(0, 120) : null;
+
 // Gateway JWT verification is disabled for modern signing keys. Every request is verified with Auth.getUser,
 // and the caller-scoped RPC authorizes the invitation in PostgreSQL before any privileged email operation.
 Deno.serve(async (request: Request) => {
@@ -48,7 +52,7 @@ Deno.serve(async (request: Request) => {
         })
       : await backend.auth.admin.inviteUserByEmail(recipient.email, {
           redirectTo,
-          data: { full_name: recipient.email.split('@')[0] },
+          data: { full_name: inviteeName(body.name) ?? recipient.email.split('@')[0] },
         });
     const { error: auditError } = await backend.from('audit_log').insert({
       actor_id: user.id,

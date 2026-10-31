@@ -1,9 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { Href } from 'expo-router';
-import { useEffect, useRef, type ComponentProps, type ComponentRef, type ReactNode } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ComponentRef,
+  type ReactNode,
+} from 'react';
 import {
   ActivityIndicator,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Switch,
@@ -14,6 +22,7 @@ import {
 } from 'react-native';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { ActionButton } from '@/components/ui/ActionButton';
+import { InfoCard } from '@/components/ui/InfoCard';
 import { colors, fonts } from '@/theme';
 import { useScrollReset } from '@/hooks/useScrollReset';
 
@@ -22,6 +31,8 @@ export const portalStyles = StyleSheet.create({
   subtitle: { fontFamily: fonts.semiBold, fontSize: 20, lineHeight: 28, color: colors.brandDark },
   body: { fontFamily: fonts.regular, fontSize: 15, lineHeight: 23, color: colors.text },
   hint: { fontFamily: fonts.regular, fontSize: 13, lineHeight: 20, color: colors.textSecondary },
+  label: { fontFamily: fonts.semiBold, fontSize: 14, lineHeight: 20, color: colors.text },
+  heading: { fontFamily: fonts.semiBold, fontSize: 16, lineHeight: 22, color: colors.text },
   section: { gap: 16, paddingVertical: 24, borderTopWidth: 1, borderTopColor: colors.border },
   row: {
     gap: 8,
@@ -41,14 +52,28 @@ export function PortalPage({
   subtitle,
   children,
   back,
-}: Readonly<{ title: string; subtitle?: string; children: ReactNode; back?: Href }>) {
+  action,
+  onRefresh,
+}: Readonly<{
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+  back?: Href;
+  action?: ReactNode;
+  onRefresh?: () => void;
+}>) {
   const scroll = useScrollReset();
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScreenHeader title={title} back={back} />
+      <ScreenHeader title={title} back={back} action={action} />
       <ScrollView
         ref={scroll}
         keyboardShouldPersistTaps="handled"
+        refreshControl={
+          onRefresh && (
+            <RefreshControl refreshing={false} onRefresh={onRefresh} tintColor={colors.primary} />
+          )
+        }
         contentContainerStyle={{
           padding: 24,
           width: '100%',
@@ -91,40 +116,98 @@ export function PortalMenuItem({
   onPress,
 }: Readonly<{
   title: string;
-  description: string;
+  description?: string;
   icon: ComponentProps<typeof Ionicons>['name'];
   onPress: () => void;
 }>) {
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityHint={description}
       onPress={onPress}
       style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 14,
-        padding: 16,
-        borderRadius: 8,
+        gap: 16,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderRadius: 12,
         borderWidth: 1,
         borderColor: colors.border,
-        backgroundColor: pressed ? colors.primarySoft : colors.background,
-        minHeight: 76,
+        backgroundColor: pressed ? colors.primarySoft : colors.surface,
+        minHeight: 56,
       })}
     >
-      <Ionicons name={icon} size={24} color={colors.primary} />
-      <View style={{ flex: 1, gap: 4 }}>
-        <Text style={portalStyles.link}>{title}</Text>
-        <Text style={portalStyles.hint}>{description}</Text>
+      <Ionicons name={icon} size={24} color={colors.text} />
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text style={portalStyles.body}>{title}</Text>
+        {description && <Text style={portalStyles.hint}>{description}</Text>}
       </View>
-      <Ionicons name="chevron-forward" size={18} color={colors.primary} />
+      <Ionicons name="chevron-forward" size={20} color={colors.text} />
     </Pressable>
   );
 }
+export function OrganizationCard({ name, role }: Readonly<{ name: string; role: string }>) {
+  return (
+    <InfoCard
+      style={{ backgroundColor: colors.surfaceSoft, padding: 20 }}
+      icon={
+        <View
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: colors.primarySoft,
+          }}
+        >
+          <Ionicons name="business" size={28} color={colors.primary} />
+        </View>
+      }
+      title={<Text style={[portalStyles.subtitle, { color: colors.text }]}>{name}</Text>}
+      subtitle={role}
+    />
+  );
+}
+export const portalFieldStyle = {
+  borderWidth: 1,
+  borderColor: colors.border,
+  borderRadius: 8,
+  backgroundColor: colors.surface,
+  minHeight: 48,
+  padding: 12,
+  fontFamily: fonts.regular,
+  fontSize: 15,
+  color: colors.text,
+} as const;
 export function PortalField({
   label,
   compact = false,
+  suffix,
+  labelStyle,
   ...props
-}: TextInputProps & { label: string; compact?: boolean }) {
+}: TextInputProps & {
+  label: string;
+  compact?: boolean;
+  suffix?: string;
+  labelStyle?: TextInputProps['style'];
+}) {
+  const input = (
+    <TextInput
+      accessibilityLabel={suffix ? `${label}, ${suffix}` : label}
+      autoCapitalize="none"
+      placeholderTextColor={colors.textSecondary}
+      {...props}
+      style={[
+        portalFieldStyle,
+        props.multiline && { minHeight: 90, textAlignVertical: 'top' },
+        compact && { width: suffix ? 64 : 96, textAlign: suffix ? 'left' : 'right' },
+        suffix && { borderWidth: 0, borderRadius: 0 },
+        props.style,
+      ]}
+    />
+  );
   return (
     <View
       style={{
@@ -133,29 +216,114 @@ export function PortalField({
         alignItems: compact ? 'center' : undefined,
       }}
     >
-      <Text style={[portalStyles.body, compact && { flex: 1 }]}>{label}</Text>
-      <TextInput
-        accessibilityLabel={label}
-        autoCapitalize="none"
-        placeholderTextColor={colors.textSecondary}
-        {...props}
-        style={[
-          {
+      <Text style={[portalStyles.body, compact && { flex: 1 }, labelStyle]}>{label}</Text>
+      {suffix ? (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
             borderWidth: 1,
             borderColor: colors.border,
             borderRadius: 8,
-            backgroundColor: colors.surface,
-            minHeight: 48,
-            padding: 12,
-            fontFamily: fonts.regular,
-            fontSize: 15,
-            color: colors.text,
-          },
-          props.multiline && { minHeight: 90, textAlignVertical: 'top' },
-          compact && { width: 96, textAlign: 'right' },
-          props.style,
-        ]}
-      />
+            overflow: 'hidden',
+            backgroundColor: colors.surfaceSoft,
+          }}
+        >
+          {input}
+          <Text style={[portalStyles.hint, { paddingHorizontal: 10 }]}>{suffix}</Text>
+        </View>
+      ) : (
+        input
+      )}
+    </View>
+  );
+}
+export function PortalSelect<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+  compact = false,
+  disabled = false,
+}: Readonly<{
+  label: string;
+  value: T;
+  options: readonly { value: T; label: string }[];
+  onChange: (value: T) => void;
+  compact?: boolean;
+  disabled?: boolean;
+}>) {
+  const [open, setOpen] = useState(false);
+  const current = options.find((option) => option.value === value);
+  return (
+    <View
+      style={{
+        gap: compact ? 16 : 8,
+        flexDirection: compact ? 'row' : 'column',
+        alignItems: compact ? 'flex-start' : undefined,
+      }}
+    >
+      <Text style={[portalStyles.label, compact && { minHeight: 48, paddingTop: 14 }]}>
+        {label}
+      </Text>
+      <View style={{ gap: 4, flex: compact ? 1 : undefined }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${label}: ${current?.label ?? ''}`}
+          accessibilityState={{ expanded: open, disabled }}
+          disabled={disabled}
+          onPress={() => setOpen(!open)}
+          style={[
+            portalFieldStyle,
+            {
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              opacity: disabled ? 0.7 : 1,
+            },
+          ]}
+        >
+          <Text style={portalStyles.body}>{current?.label}</Text>
+          <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={20} color={colors.text} />
+        </Pressable>
+        {open && (
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: colors.border,
+              borderRadius: 8,
+              backgroundColor: colors.surface,
+              overflow: 'hidden',
+            }}
+          >
+            {options.map((option) => (
+              <Pressable
+                key={option.value}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: option.value === value }}
+                onPress={() => {
+                  onChange(option.value);
+                  setOpen(false);
+                }}
+                style={({ pressed }) => ({
+                  minHeight: 44,
+                  paddingHorizontal: 12,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  backgroundColor:
+                    pressed || option.value === value ? colors.primarySoft : colors.surface,
+                })}
+              >
+                <Text style={portalStyles.body}>{option.label}</Text>
+                {option.value === value && (
+                  <Ionicons name="checkmark" size={20} color={colors.primary} />
+                )}
+              </Pressable>
+            ))}
+          </View>
+        )}
+      </View>
     </View>
   );
 }
@@ -206,9 +374,9 @@ export function PortalChoice({
       style={{ flexDirection: 'row', gap: 12, alignItems: 'center', minHeight: 44 }}
     >
       <Ionicons
-        name={selected ? 'checkbox-outline' : 'square-outline'}
-        size={22}
-        color={colors.primary}
+        name={selected ? 'checkbox' : 'square-outline'}
+        size={24}
+        color={selected ? colors.primary : colors.textSecondary}
       />
       <Text style={portalStyles.body}>{label}</Text>
     </Pressable>

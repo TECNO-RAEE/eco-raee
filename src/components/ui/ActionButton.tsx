@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 import { colors, fonts } from '@/theme';
 
@@ -7,12 +8,14 @@ export function ActionButton({
   secondary = false,
   loading = false,
   disabled = false,
+  icon,
 }: Readonly<{
   title: string;
   onPress: () => void;
   secondary?: boolean;
   loading?: boolean;
   disabled?: boolean;
+  icon?: ReactNode;
 }>) {
   return (
     <Pressable
@@ -22,6 +25,7 @@ export function ActionButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
+        icon != null && styles.withIcon,
         secondary && styles.secondary,
         (pressed || loading || disabled) && styles.pressed,
       ]}
@@ -29,7 +33,10 @@ export function ActionButton({
       {loading ? (
         <ActivityIndicator color={secondary ? colors.primary : colors.textOnPrimary} />
       ) : (
-        <Text style={[styles.text, secondary && styles.secondaryText]}>{title}</Text>
+        <>
+          {icon}
+          <Text style={[styles.text, secondary && styles.secondaryText]}>{title}</Text>
+        </>
       )}
     </Pressable>
   );
@@ -44,6 +51,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  withIcon: { flexDirection: 'row', gap: 12 },
   secondary: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary },
   text: {
     fontFamily: fonts.semiBold,

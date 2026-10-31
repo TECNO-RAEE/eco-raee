@@ -35,3 +35,36 @@ export function scheduleText(
       .join(', ')
   );
 }
+export const scheduleGroups = [
+  { label: 'Lunes a viernes', days: [0, 1, 2, 3, 4] },
+  { label: 'Sábado', days: [5] },
+  { label: 'Domingo', days: [6] },
+];
+export type ScheduleRange = { opens: string; closes: string };
+// Returns null when the days cannot be shown as one range per group (split shifts or weekdays that differ).
+export function groupScheduleText(days: string[]): ScheduleRange[] | null {
+  const ranges = scheduleGroups.map(({ days: group }) => {
+    const text = days[group[0]] ?? '';
+    if (text.includes(',') || group.some((day) => (days[day] ?? '') !== text)) return null;
+    const [opens = '', closes = ''] = text ? text.split('-').map((part) => part.trim()) : [];
+    return { opens, closes };
+  });
+  return ranges.every((range) => range !== null) ? ranges : null;
+}
+function rangeText({ opens, closes }: ScheduleRange) {
+  return opens.trim() || closes.trim() ? `${opens.trim()}-${closes.trim()}` : '';
+}
+export function groupedDays(ranges: ScheduleRange[], strict = true): string[] {
+  if (strict)
+    scheduleGroups.forEach(({ label }, i) => {
+      if (!ranges[i].opens.trim() !== !ranges[i].closes.trim())
+        throw new Error(`Completá la apertura y el cierre de ${label.toLowerCase()}.`);
+    });
+  return weekdays.map((_, day) =>
+    rangeText(ranges[scheduleGroups.findIndex(({ days }) => days.includes(day))])
+  );
+}
+export function formatTimeInput(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 4);
+  return digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+}

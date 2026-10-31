@@ -319,9 +319,9 @@ export async function getChangelog(
     })),
   };
 }
-export async function sendCompanyInvitation(invitationId: string) {
+export async function sendCompanyInvitation(invitationId: string, name?: string) {
   const { error } = await supabase.functions.invoke('company-invitation', {
-    body: { invitationId },
+    body: { invitationId, name: name?.trim() || undefined },
   });
   if (error)
     throw new Error(

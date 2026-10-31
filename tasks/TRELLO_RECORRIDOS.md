@@ -19,7 +19,7 @@
 | **CARD-05** | [Recorrido 05: Solicitar y seguir un retiro](#card-05-recorrido-05--solicitar-y-seguir-un-retiro-3-vistas) | Nueva funcionalidad completa | Por implementar (Backlog P2) |
 | **CARD-06** | [Recorrido 06: Premios que acompañan al comercio](#card-06-recorrido-06--premios-que-acompañan-al-comercio-4-vistas) | Rediseño visual (Grilla a Lista) | Funcional con desvíos visuales |
 | **CARD-07** | [Recorrido 07: Cuenta, saldo e historial](#card-07-recorrido-07--cuenta-saldo-e-historial-3-vistas) | Refactor + Nueva pantalla unificada | 2 vistas funcionales + 1 feed nuevo |
-| **CARD-08** | [Recorrido 08: Gestión de la organización](#card-08-recorrido-08--gestión-de-la-organización-4-vistas) | Adaptación móvil de portal | Funcional en desktop/portal |
+| **CARD-08** | [Recorrido 08: Gestión de la organización](#card-08-recorrido-08--gestión-de-la-organización-4-vistas) | Adaptación móvil de portal | Implementado y verificado |
 | **CARD-09** | [Recorrido 09: Recibir y validar en el local](#card-09-recorrido-09--recibir-y-validar-en-el-local-3-vistas) | Rediseño de escáner y validación | Lógica funcional, UI desalineada |
 | **CARD-10** | [Recorrido 10: Coordinar y operar los retiros](#card-10-recorrido-10--coordinar-y-operar-los-retiros-3-vistas) | Nueva funcionalidad completa | Por implementar (Backlog P2) |
 | **CARD-11** | [Recorrido 11: Administración y trazabilidad](#card-11-recorrido-11--administración-y-trazabilidad-4-vistas) | Adaptación móvil y filtros | Funcional en portal, UI desalineada |
@@ -345,19 +345,19 @@ Adaptar las herramientas de gestión de la organización (empresa / punto verde)
 - `src/components/portal/PortalUI.tsx`
 
 #### Checklist de tareas
-- [ ] **Panel Mi empresa:**
-  - [ ] Reestructurar el menú principal para que en pantallas móviles se presente como una lista de navegación con chevrons y no como pestañas horizontales diminutas.
-  - [ ] Destacar el botón primario de escáner en la parte superior.
-- [ ] **Edición de Punto verde:**
-  - [ ] Integrar el mapa interactivo con marcador arrastrable o selector de coordenadas.
-  - [ ] Crear la grilla de configuración horaria con rangos de apertura y cierre.
-  - [ ] Implementar la selección de categorías mediante checkboxes accesibles.
-- [ ] **Puntos por categoría:**
-  - [ ] Maquetar la tabla compacta con inputs alineados a la derecha.
-  - [ ] Validar que solo se ingresen números enteros positivos.
-- [ ] **Equipo:**
-  - [ ] Maquetar la lista de miembros con badges visuales de rol.
-  - [ ] Implementar el formulario de invitación conectado al servicio de invitaciones por email existente.
+- [x] **Panel Mi empresa:**
+  - [x] Reestructurar el menú principal para que en pantallas móviles se presente como una lista de navegación con chevrons y no como pestañas horizontales diminutas.
+  - [x] Destacar el botón primario de escáner en la parte superior.
+- [x] **Edición de Punto verde:**
+  - [x] Integrar el mapa interactivo con marcador arrastrable o selector de coordenadas.
+  - [x] Crear la grilla de configuración horaria con rangos de apertura y cierre.
+  - [x] Implementar la selección de categorías mediante checkboxes accesibles.
+- [x] **Puntos por categoría:**
+  - [x] Maquetar la tabla compacta con inputs alineados a la derecha.
+  - [x] Validar que solo se ingresen números enteros positivos.
+- [x] **Equipo:**
+  - [x] Maquetar la lista de miembros con badges visuales de rol.
+  - [x] Implementar el formulario de invitación conectado al servicio de invitaciones por email existente.
 
 #### Criterios de Aceptación
 - Solo los usuarios con rol de `Responsable` (owner) pueden editar horarios, puntos y equipo.
